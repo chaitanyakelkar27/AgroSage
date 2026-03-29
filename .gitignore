@@ -1,0 +1,61 @@
+# ══════════════════════════════════════════════
+#  AgroSage — .gitignore
+# ══════════════════════════════════════════════
+
+# ── Python ──
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+*.whl
+
+# ── Virtual Environments ──
+venv/
+env/
+.venv/
+.env
+
+# ── IDE / Editor ──
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Jupyter ──
+.ipynb_checkpoints/
+
+# ── Trained Models (large binaries) ──
+models/*.pkl
+models/*.h5
+models/*.savedmodel/
+models/*.tflite
+models/*.onnx
+!models/.gitkeep
+
+# ── Datasets (large files) ──
+data/*.csv
+data/*.json
+data/*.zip
+data/*.tar.gz
+data/*.parquet
+!data/.gitkeep
+
+# ── Logs & Temp ──
+*.log
+tmp/
+.tmp/
+
+# ── Streamlit ──
+.streamlit/secrets.toml
+
+# ── OS generated ──
+*.DS_Store
+ehthumbs.db
