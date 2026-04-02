@@ -40,13 +40,8 @@ models/*.tflite
 models/*.onnx
 !models/.gitkeep
 
-# ── Datasets (large files) ──
-data/*.csv
-data/*.json
-data/*.zip
-data/*.tar.gz
-data/*.parquet
-!data/.gitkeep
+# ── Datasets (entire folder) ──
+data/
 
 # ── Logs & Temp ──
 *.log
