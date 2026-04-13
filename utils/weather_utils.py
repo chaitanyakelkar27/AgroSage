@@ -130,14 +130,14 @@ _CITY_PROFILES = {
 }
 
 _WEATHER_CONDITIONS = [
-    ("☀️ Clear Sky",       "clear"),
-    ("⛅ Partly Cloudy",   "partly_cloudy"),
-    ("☁️ Overcast",        "overcast"),
-    ("🌧️ Light Rain",     "light_rain"),
-    ("🌦️ Showers",        "showers"),
-    ("⛈️ Thunderstorm",   "thunderstorm"),
-    ("🌫️ Foggy",          "foggy"),
-    ("💨 Windy",           "windy"),
+    ("Clear Sky",       "clear"),
+    ("Partly Cloudy",   "partly_cloudy"),
+    ("Overcast",        "overcast"),
+    ("Light Rain",      "light_rain"),
+    ("Showers",         "showers"),
+    ("Thunderstorm",    "thunderstorm"),
+    ("Foggy",           "foggy"),
+    ("Windy",           "windy"),
 ]
 
 
