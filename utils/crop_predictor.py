@@ -35,6 +35,18 @@ _ARTEFACT_NAMES = [
 
 # Module-level cache so we only load once per process
 _cache: dict[str, Any] | None = None
+_cache_signature: tuple[float, ...] | None = None
+
+
+def _current_signature() -> tuple[float, ...]:
+    """Return mtimes for all crop artefacts to detect on-disk updates."""
+    sig = []
+    for fname in _ARTEFACT_NAMES:
+        path = os.path.join(_MODEL_DIR, fname)
+        if not os.path.isfile(path):
+            return ()
+        sig.append(os.path.getmtime(path))
+    return tuple(sig)
 
 
 # ── Loader ─────────────────────────────────────────────────────────────────────
@@ -48,8 +60,9 @@ def load_crop_models() -> dict[str, Any]:
     dict with keys:
         model, scaler, classes, kmeans, cluster_map
     """
-    global _cache
-    if _cache is not None:
+    global _cache, _cache_signature
+    current_sig = _current_signature()
+    if _cache is not None and _cache_signature == current_sig:
         return _cache
 
     artefacts: dict[str, Any] = {}
@@ -65,6 +78,7 @@ def load_crop_models() -> dict[str, Any]:
         artefacts[key] = joblib.load(path)
 
     _cache = artefacts
+    _cache_signature = _current_signature()
     return _cache
 
 
