@@ -8,60 +8,81 @@
 
 /* ── CSS Variables ── */
 :root {
-    --color-primary:        #1B4332;
-    --color-primary-dark:   #143528;
-    --color-primary-light:  #2D6A4F;
-    --color-accent:         #40916C;
-    --color-accent-light:   #52B788;
-    --color-accent-glow:    rgba(82, 183, 136, 0.15);
-    --color-surface:        #FFFFFF;
-    --color-surface-alt:    #F8FAF9;
-    --color-bg:             #F1F5F3;
-    --color-border:         #D5DDD9;
-    --color-border-light:   #E8EDEA;
-    --color-text:           #1A1F1C;
+    --color-primary: #1B4332;
+    --color-primary-dark: #143528;
+    --color-primary-light: #2D6A4F;
+    --color-accent: #40916C;
+    --color-accent-light: #52B788;
+    --color-accent-glow: rgba(82, 183, 136, 0.15);
+    --color-surface: #FFFFFF;
+    --color-surface-alt: #F8FAF9;
+    --color-bg: #F1F5F3;
+    --color-border: #D5DDD9;
+    --color-border-light: #E8EDEA;
+    --color-text: #1A1F1C;
     --color-text-secondary: #5A6B60;
-    --color-text-muted:     #8A9B90;
-    --color-danger:         #C0392B;
-    --color-warning:        #E67E22;
-    --color-info:           #2980B9;
-    --color-success:        #27AE60;
-    --radius-sm:            6px;
-    --radius-md:            10px;
-    --radius-lg:            14px;
-    --shadow-sm:            0 1px 3px rgba(27, 67, 50, 0.06);
-    --shadow-md:            0 2px 8px rgba(27, 67, 50, 0.08);
-    --shadow-lg:            0 4px 16px rgba(27, 67, 50, 0.10);
-    --shadow-accent:        0 2px 12px rgba(64, 145, 108, 0.2);
-    --transition:           all 0.2s ease;
-    --font-body:            'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-    --font-mono:            'DM Mono', 'Fira Code', monospace;
+    --color-text-muted: #8A9B90;
+    --color-danger: #C0392B;
+    --color-warning: #E67E22;
+    --color-info: #2980B9;
+    --color-success: #27AE60;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --shadow-sm: 0 1px 3px rgba(27, 67, 50, 0.06);
+    --shadow-md: 0 2px 8px rgba(27, 67, 50, 0.08);
+    --shadow-lg: 0 4px 16px rgba(27, 67, 50, 0.10);
+    --shadow-accent: 0 2px 12px rgba(64, 145, 108, 0.2);
+    --transition: all 0.2s ease;
+    --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'DM Mono', 'Fira Code', monospace;
 }
 
 
 /* ── Global Reset & Base ── */
-html, body, [data-testid="stAppViewContainer"] {
+html,
+body,
+[data-testid="stAppViewContainer"] {
     font-family: var(--font-body) !important;
     color: var(--color-text) !important;
     background-color: var(--color-bg) !important;
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     box-sizing: border-box;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
     font-family: var(--font-body) !important;
     font-weight: 600 !important;
     color: var(--color-primary) !important;
     letter-spacing: -0.01em;
 }
 
-h1 { font-size: 1.75rem !important; margin-bottom: 0.25rem !important; }
-h2 { font-size: 1.35rem !important; }
-h3 { font-size: 1.1rem !important; }
+h1 {
+    font-size: 1.75rem !important;
+    margin-bottom: 0.25rem !important;
+}
 
-p, li, label, span {
+h2 {
+    font-size: 1.35rem !important;
+}
+
+h3 {
+    font-size: 1.1rem !important;
+}
+
+p,
+li,
+label,
+span {
     font-family: var(--font-body) !important;
     font-size: 0.9rem;
     line-height: 1.55;
@@ -69,24 +90,72 @@ p, li, label, span {
 
 
 /* ── Scrollbar ── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: var(--color-bg); }
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color-bg);
+}
+
 ::-webkit-scrollbar-thumb {
     background: var(--color-border);
     border-radius: 3px;
 }
-::-webkit-scrollbar-thumb:hover { background: var(--color-accent); }
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-accent);
+}
 
 
 /* ── Hide Streamlit Branding ── */
-#MainMenu, footer, header[data-testid="stHeader"] {
+#MainMenu,
+footer {
     visibility: hidden !important;
     height: 0 !important;
 }
 
-[data-testid="stToolbar"] { display: none !important; }
+/* Keep Streamlit header available so sidebar collapse/expand control works */
+header[data-testid="stHeader"] {
+    visibility: visible !important;
+    height: 2.25rem !important;
+    min-height: 2.25rem !important;
+    background: transparent !important;
+    border: none !important;
+}
 
-[data-testid="stDecoration"] { display: none !important; }
+/* Make the collapsed-sidebar toggle consistently visible */
+[data-testid="collapsedControl"] {
+    display: flex !important;
+    opacity: 1 !important;
+    z-index: 1000 !important;
+    visibility: visible !important;
+}
+
+[data-testid="collapsedControl"] button {
+    background: rgba(27, 67, 50, 0.9) !important;
+    border: 1px solid rgba(82, 183, 136, 0.45) !important;
+    border-radius: 8px !important;
+    box-shadow: var(--shadow-md) !important;
+}
+
+[data-testid="collapsedControl"] svg {
+    fill: #E8F5EC !important;
+}
+
+[data-testid="stToolbar"] {
+    display: none !important;
+}
+
+[data-testid="stDecoration"] {
+    display: none !important;
+}
+
+/* Hide default Streamlit sidebar page navigation (we use custom nav) */
+[data-testid="stSidebarNav"] {
+    display: none !important;
+}
 
 
 /* ── Main Content Area ── */
@@ -104,6 +173,12 @@ p, li, label, span {
     border-right: none !important;
     min-width: 260px !important;
     max-width: 280px !important;
+}
+
+/* Prevent collapsed sidebar from leaving a dead gutter on the left */
+[data-testid="stSidebar"][aria-expanded="false"] {
+    min-width: 0 !important;
+    max-width: 0 !important;
 }
 
 [data-testid="stSidebar"] * {
@@ -145,7 +220,7 @@ p, li, label, span {
 /* ═══════════════════════════════════════════
    BUTTONS
    ═══════════════════════════════════════════ */
-.stButton > button {
+.stButton>button {
     font-family: var(--font-body) !important;
     font-weight: 500 !important;
     font-size: 0.85rem !important;
@@ -160,26 +235,26 @@ p, li, label, span {
     letter-spacing: 0.01em;
 }
 
-.stButton > button:hover {
+.stButton>button:hover {
     background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-accent) 100%) !important;
     box-shadow: var(--shadow-accent) !important;
     transform: translateY(-1px);
 }
 
-.stButton > button:active {
+.stButton>button:active {
     transform: translateY(0px);
     box-shadow: var(--shadow-sm) !important;
 }
 
 /* Secondary / outline buttons */
-.stButton > button[kind="secondary"],
-[data-testid="stFormSubmitButton"] > button {
+.stButton>button[kind="secondary"],
+[data-testid="stFormSubmitButton"]>button {
     background: var(--color-surface) !important;
     color: var(--color-primary) !important;
     border: 1.5px solid var(--color-accent) !important;
 }
 
-[data-testid="stFormSubmitButton"] > button:hover {
+[data-testid="stFormSubmitButton"]>button:hover {
     background: var(--color-accent-glow) !important;
     border-color: var(--color-accent-light) !important;
     color: var(--color-primary-dark) !important;
@@ -187,7 +262,7 @@ p, li, label, span {
 
 
 /* Download button */
-.stDownloadButton > button {
+.stDownloadButton>button {
     background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%) !important;
     color: #FFFFFF !important;
     border: none !important;
@@ -198,9 +273,9 @@ p, li, label, span {
 /* ═══════════════════════════════════════════
    INPUTS — Text, Number, Select, Slider
    ═══════════════════════════════════════════ */
-.stTextInput > div > div > input,
-.stNumberInput > div > div > input,
-.stTextArea > div > div > textarea {
+.stTextInput>div>div>input,
+.stNumberInput>div>div>input,
+.stTextArea>div>div>textarea {
     font-family: var(--font-body) !important;
     font-size: 0.88rem !important;
     background-color: var(--color-surface) !important;
@@ -211,9 +286,9 @@ p, li, label, span {
     transition: var(--transition) !important;
 }
 
-.stTextInput > div > div > input:focus,
-.stNumberInput > div > div > input:focus,
-.stTextArea > div > div > textarea:focus {
+.stTextInput>div>div>input:focus,
+.stNumberInput>div>div>input:focus,
+.stTextArea>div>div>textarea:focus {
     border-color: var(--color-accent) !important;
     box-shadow: 0 0 0 2px var(--color-accent-glow) !important;
     outline: none !important;
@@ -237,8 +312,8 @@ p, li, label, span {
 }
 
 /* Select boxes */
-.stSelectbox > div > div,
-.stMultiSelect > div > div {
+.stSelectbox>div>div,
+.stMultiSelect>div>div {
     background-color: var(--color-surface) !important;
     border: 1.5px solid var(--color-border) !important;
     border-radius: var(--radius-sm) !important;
@@ -253,11 +328,11 @@ p, li, label, span {
     color: var(--color-primary) !important;
 }
 
-[data-testid="stSlider"] > div > div > div[role="slider"] {
+[data-testid="stSlider"]>div>div>div[role="slider"] {
     background-color: var(--color-accent) !important;
 }
 
-[data-testid="stSlider"] > div > div > div > div {
+[data-testid="stSlider"]>div>div>div>div {
     background: linear-gradient(90deg, var(--color-accent-light), var(--color-accent)) !important;
 }
 
@@ -376,7 +451,7 @@ div[data-baseweb="notification"][kind="negative"] {
     background: var(--color-surface-alt) !important;
 }
 
-[data-testid="stExpander"] > div[data-testid="stExpanderDetails"] {
+[data-testid="stExpander"]>div[data-testid="stExpanderDetails"] {
     padding: 0 1rem 0.75rem 1rem !important;
     border-top: 1px solid var(--color-border-light) !important;
 }
@@ -619,7 +694,7 @@ div[data-baseweb="notification"][kind="negative"] {
 /* ═══════════════════════════════════════════
    SPINNER / LOADING
    ═══════════════════════════════════════════ */
-.stSpinner > div {
+.stSpinner>div {
     border-top-color: var(--color-accent) !important;
 }
 
@@ -632,7 +707,9 @@ div[data-baseweb="notification"][kind="negative"] {
         padding: 1rem 1rem 1.5rem 1rem !important;
     }
 
-    h1 { font-size: 1.4rem !important; }
+    h1 {
+        font-size: 1.4rem !important;
+    }
 
     [data-testid="stMetric"] [data-testid="stMetricValue"] {
         font-size: 1.15rem !important;
