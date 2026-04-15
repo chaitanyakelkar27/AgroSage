@@ -1,0 +1,10 @@
+{
+  "validation_samples": 17572,
+  "accuracy": 0.979001,
+  "accuracy_percent": 97.9,
+  "macro_precision": 0.979484,
+  "macro_recall": 0.979211,
+  "macro_f1": 0.978983,
+  "loss_curve_epochs": 5,
+  "loss_curve_note": "Generated from short fine-tuning pass for reporting."
+}
