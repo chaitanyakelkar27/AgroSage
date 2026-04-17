@@ -4,6 +4,7 @@ Predict the best crop for your soil and weather conditions.
 """
 
 import os
+import html
 
 import streamlit as st
 import plotly.graph_objects as go
@@ -139,6 +140,9 @@ st.markdown("""
 .cr-alt:hover {
     border-color: var(--color-accent);
 }
+.cr-alt-wrap {
+    margin-bottom: 0.55rem;
+}
 .cr-alt-name {
     font-family: var(--font-body);
     font-size: 0.88rem;
@@ -151,6 +155,17 @@ st.markdown("""
     font-size: 0.82rem;
     font-weight: 500;
     color: var(--color-accent);
+}
+.cr-alt-reason-list {
+    margin: 0.35rem 0 0 1rem;
+    padding: 0;
+}
+.cr-alt-reason-list li {
+    font-family: var(--font-body);
+    font-size: 0.78rem;
+    color: var(--color-text-secondary);
+    line-height: 1.4;
+    margin-bottom: 0.15rem;
 }
 
 /* ── Similar crop tag ── */
@@ -191,6 +206,17 @@ st.markdown("""
     color: var(--color-text-secondary);
     line-height: 1.5;
     margin: 0;
+}
+.cr-reason-list {
+    margin: 0.35rem 0 0 1rem;
+    padding: 0;
+}
+.cr-reason-list li {
+    font-family: var(--font-body);
+    font-size: 0.82rem;
+    color: var(--color-text-secondary);
+    line-height: 1.45;
+    margin-bottom: 0.25rem;
 }
 
 /* ── Input form layout ── */
@@ -385,6 +411,7 @@ st.markdown(
 
 best_crop = str(result.get("best_crop", "unknown"))
 confidence = float(result.get("confidence", 0.0))
+best_reasons = result.get("best_reasons", [])
 alternatives = result.get("alternatives", [])
 similar_crops = result.get("similar_crops", [])
 all_probs = result.get("all_probabilities", {})
@@ -411,6 +438,22 @@ st.markdown(
 )
 
 st.markdown("<div style='height:1rem;'></div>", unsafe_allow_html=True)
+
+if best_reasons:
+    reasons_html = "".join(
+        f"<li>{html.escape(str(reason))}</li>" for reason in best_reasons
+    )
+    st.markdown(
+        f"""
+        <div class="cr-note" style="margin-top:0;">
+            <div class="cr-note-title">Why This Crop Was Selected</div>
+            <ul class="cr-reason-list">{reasons_html}</ul>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+st.markdown("<div style='height:0.7rem;'></div>", unsafe_allow_html=True)
 
 
 # ── 2. Stat cards row ──
@@ -476,11 +519,21 @@ with alt_col:
     if alternatives:
         for alt in alternatives:
             prob_display = f"{alt['probability']:.1f}%" if alt["probability"] >= 0.1 else "<0.1%"
+            reason_items = ""
+            alt_reasons = alt.get("reasons", [])
+            if alt_reasons:
+                top_alt_reasons = "".join(
+                    f"<li>{html.escape(str(reason))}</li>" for reason in alt_reasons[:2]
+                )
+                reason_items = f'<ul class="cr-alt-reason-list">{top_alt_reasons}</ul>'
             st.markdown(
                 f"""
-                <div class="cr-alt">
-                    <span class="cr-alt-name">{alt['name']}</span>
-                    <span class="cr-alt-prob">{prob_display}</span>
+                <div class="cr-alt-wrap">
+                    <div class="cr-alt">
+                        <span class="cr-alt-name">{html.escape(str(alt['name']))}</span>
+                        <span class="cr-alt-prob">{prob_display}</span>
+                    </div>
+                    {reason_items}
                 </div>
                 """,
                 unsafe_allow_html=True,
