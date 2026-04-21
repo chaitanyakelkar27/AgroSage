@@ -427,6 +427,67 @@ div[data-baseweb="notification"][kind="negative"] {
     border-left-color: var(--color-danger) !important;
 }
 
+/* Ensure readable foreground text inside alert/callout bodies */
+.stAlert [data-testid="stMarkdownContainer"] p,
+.stAlert [data-testid="stMarkdownContainer"] li,
+.stAlert [data-testid="stMarkdownContainer"] span,
+.stAlert [data-testid="stText"] {
+    opacity: 1 !important;
+}
+
+.stAlert [data-testid="stAlertContentSuccess"] [data-testid="stMarkdownContainer"] p,
+.stAlert [data-testid="stAlertContentSuccess"] [data-testid="stMarkdownContainer"] li,
+.stAlert [data-testid="stAlertContentSuccess"] [data-testid="stMarkdownContainer"] span,
+.stAlert [data-testid="stAlertContentSuccess"] [data-testid="stText"] {
+    color: #1F6B44 !important;
+}
+
+.stAlert [data-testid="stAlertContentInfo"] [data-testid="stMarkdownContainer"] p,
+.stAlert [data-testid="stAlertContentInfo"] [data-testid="stMarkdownContainer"] li,
+.stAlert [data-testid="stAlertContentInfo"] [data-testid="stMarkdownContainer"] span,
+.stAlert [data-testid="stAlertContentInfo"] [data-testid="stText"] {
+    color: #0F4F73 !important;
+}
+
+.stAlert [data-testid="stAlertContentWarning"] [data-testid="stMarkdownContainer"] p,
+.stAlert [data-testid="stAlertContentWarning"] [data-testid="stMarkdownContainer"] li,
+.stAlert [data-testid="stAlertContentWarning"] [data-testid="stMarkdownContainer"] span,
+.stAlert [data-testid="stAlertContentWarning"] [data-testid="stText"] {
+    color: #7A4A0A !important;
+}
+
+.stAlert [data-testid="stAlertContentError"] [data-testid="stMarkdownContainer"] p,
+.stAlert [data-testid="stAlertContentError"] [data-testid="stMarkdownContainer"] li,
+.stAlert [data-testid="stAlertContentError"] [data-testid="stMarkdownContainer"] span,
+.stAlert [data-testid="stAlertContentError"] [data-testid="stText"] {
+    color: #8B2D24 !important;
+}
+
+/* Fallback selectors for BaseWeb notification markup variations */
+div[data-baseweb="notification"][kind="positive"] p,
+div[data-baseweb="notification"][kind="positive"] li,
+div[data-baseweb="notification"][kind="positive"] span {
+    color: #1F6B44 !important;
+}
+
+div[data-baseweb="notification"][kind="info"] p,
+div[data-baseweb="notification"][kind="info"] li,
+div[data-baseweb="notification"][kind="info"] span {
+    color: #0F4F73 !important;
+}
+
+div[data-baseweb="notification"][kind="warning"] p,
+div[data-baseweb="notification"][kind="warning"] li,
+div[data-baseweb="notification"][kind="warning"] span {
+    color: #7A4A0A !important;
+}
+
+div[data-baseweb="notification"][kind="negative"] p,
+div[data-baseweb="notification"][kind="negative"] li,
+div[data-baseweb="notification"][kind="negative"] span {
+    color: #8B2D24 !important;
+}
+
 
 /* ═══════════════════════════════════════════
    EXPANDERS

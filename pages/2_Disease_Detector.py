@@ -14,6 +14,7 @@ from utils.disease_predictor import (
     preprocess_image,
     clean_image,
     prepare_classifier_input,
+    compute_image_quality_metrics,
     parse_disease_label,
     predict_disease,
 )
@@ -314,6 +315,14 @@ with upload_col:
         help="Supported formats: JPG, JPEG, PNG, WebP. For best results use a clear, close-up photograph of the leaf.",
         key="disease_uploader",
     )
+    field_photo_mode = st.toggle(
+        "Field Photo Mode (recommended)",
+        value=True,
+        help=(
+            "Uses test-time augmentation and stricter false-positive checks for real-world "
+            "photos that include natural background, shadows, or hands."
+        ),
+    )
     st.markdown('</div>', unsafe_allow_html=True)
 
 with preview_col:
@@ -367,8 +376,18 @@ if current_image is not None:
                 cnn, autoencoder, img_batch
             )
 
+            reconstruction_error = float(np.mean((img_batch - cleaned_batch) ** 2))
+            quality_metrics = compute_image_quality_metrics(img_batch)
+
             # Predict
-            result = predict_disease(cnn, classifier_input, idx_to_class)
+            result = predict_disease(
+                cnn,
+                classifier_input,
+                idx_to_class,
+                reconstruction_error=reconstruction_error,
+                image_quality_metrics=quality_metrics,
+                inference_mode="field" if field_photo_mode else "standard",
+            )
 
             # Store cleaned image for preview
             cleaned_arr = (np.squeeze(cleaned_batch, axis=0) * 255).astype(np.uint8)
@@ -414,6 +433,17 @@ disease = result["disease"]
 probability = result["probability"]
 alert_level = result["alert_level"]
 all_results = result["all_results"]
+requires_manual_review = bool(result.get("requires_manual_review", False))
+likely_false_positive = bool(result.get("likely_false_positive", False))
+is_inconclusive = bool(result.get("is_inconclusive", False))
+diagnostic_flags = result.get("diagnostic_flags", [])
+healthy_probability_for_plant = float(result.get("healthy_probability_for_plant", 0.0))
+confidence_gap = float(result.get("confidence_gap", 0.0))
+top_consistency = float(result.get("top_consistency", 1.0))
+top_probability_std = float(result.get("top_probability_std", 0.0))
+inference_mode = str(result.get("inference_mode", "field"))
+reconstruction_error = result.get("reconstruction_error")
+image_quality_metrics = result.get("image_quality_metrics", {})
 
 # Determine alert text
 _alert_labels = {
@@ -423,6 +453,12 @@ _alert_labels = {
     "none": "Healthy — No Disease Detected",
 }
 alert_text = _alert_labels.get(alert_level, "Analysis Complete")
+if is_inconclusive and alert_level != "none":
+    alert_text = "Inconclusive — Retake Photo Or Verify Manually"
+elif likely_false_positive and alert_level != "none":
+    alert_text = "Possible False Positive — Visual Symptoms Are Weak"
+elif requires_manual_review and alert_level != "none":
+    alert_text = "Confidence Reduced — Manual Review Recommended"
 _risk_badge_label = {
     "high": "High Risk",
     "medium": "Medium Risk",
@@ -450,6 +486,65 @@ st.markdown(
 )
 
 st.markdown("<div style='height:1rem;'></div>", unsafe_allow_html=True)
+
+if requires_manual_review:
+    review_points = []
+    if "high_reconstruction_error" in diagnostic_flags:
+        review_points.append("Image characteristics differ from the model's training-domain pattern.")
+    if "high_background_complexity" in diagnostic_flags:
+        review_points.append("Background detail is high, which can reduce model reliability on field photos.")
+    if "very_low_leaf_coverage" in diagnostic_flags:
+        review_points.append("Leaf occupies a small part of the frame, so diagnosis confidence is reduced.")
+    if "low_leaf_coverage" in diagnostic_flags:
+        review_points.append("Leaf coverage is limited in this frame, which may affect confidence.")
+    if "weak_lesion_evidence" in diagnostic_flags:
+        review_points.append(
+            "The image appears mostly green with weak visible lesion evidence for the predicted disease class."
+        )
+    if "healthy_competition" in diagnostic_flags:
+        review_points.append(
+            "Healthy class probability is competitive with disease probability for this plant."
+        )
+    if "unstable_tta_prediction" in diagnostic_flags:
+        review_points.append(
+            "Prediction changed across augmentations, indicating low inference stability in field mode."
+        )
+    if "high_tta_variance" in diagnostic_flags:
+        review_points.append(
+            "Top class confidence varied across augmentations, indicating uncertain diagnosis."
+        )
+    if not review_points:
+        review_points.append("Model reliability checks suggest this prediction may require manual confirmation.")
+
+    metrics_line_parts = []
+    if reconstruction_error is not None:
+        metrics_line_parts.append(f"Reconstruction error: {float(reconstruction_error):.6f}")
+    edge_density = image_quality_metrics.get("edge_density")
+    if edge_density is not None:
+        metrics_line_parts.append(f"Edge density: {float(edge_density):.4f}")
+    green_ratio = image_quality_metrics.get("green_ratio")
+    if green_ratio is not None:
+        metrics_line_parts.append(f"Leaf coverage: {float(green_ratio):.1%}")
+    lesion_score = image_quality_metrics.get("lesion_evidence_score")
+    if lesion_score is not None:
+        metrics_line_parts.append(f"Lesion evidence score: {float(lesion_score):.4f}")
+    metrics_line_parts.append(f"Inference mode: {inference_mode}")
+    metrics_line_parts.append(f"TTA top consistency: {top_consistency:.1%}")
+    metrics_line_parts.append(f"TTA top std-dev: {top_probability_std:.4f}")
+    metrics_line = " | ".join(metrics_line_parts)
+
+    banner_line = "Result marked as inconclusive." if is_inconclusive else "Prediction quality guardrail triggered."
+    st.warning(
+        "\n".join([
+            banner_line,
+            "Hands or some background are normal in real-world photos; this is only a confidence warning.",
+            *[f"- {point}" for point in review_points],
+            f"- Healthy probability for {plant}: {healthy_probability_for_plant:.1%}",
+            f"- Confidence gap (top1-top2): {confidence_gap:.1%}",
+            *( [f"- {metrics_line}"] if metrics_line else [] ),
+            "Optional improvement: keep one leaf as the main focus under natural daylight.",
+        ])
+    )
 
 
 # ── 2. Stat cards row ──

@@ -16,7 +16,6 @@ from PIL import Image
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-VALID_DIR = os.path.join(BASE_DIR, "data", "plant_disease_dataset", "valid")
 IMG_SIZE = (128, 128)
 
 if BASE_DIR not in sys.path:
@@ -47,6 +46,24 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def resolve_valid_dir(base_dir: str) -> str:
+    """Resolve validation split across supported disease dataset layouts."""
+    candidates = [
+        os.path.join(base_dir, "data", "Plant Village Dataset", "Val"),
+        os.path.join(base_dir, "data", "Plant Village Dataset", "val"),
+        os.path.join(base_dir, "data", "plant_disease_dataset", "valid"),
+    ]
+    for path in candidates:
+        if os.path.isdir(path):
+            return path
+
+    checked = "\n".join(candidates)
+    raise FileNotFoundError(
+        "Validation directory not found in supported locations. Checked:\n"
+        f"{checked}"
+    )
+
+
 def collect_image_paths(valid_dir: str) -> list[tuple[str, str]]:
     class_dirs = [
         d
@@ -74,11 +91,12 @@ def collect_image_paths(valid_dir: str) -> list[tuple[str, str]]:
 
 def main() -> None:
     args = parse_args()
+    valid_dir = resolve_valid_dir(BASE_DIR)
 
-    if not os.path.isdir(VALID_DIR):
-        raise FileNotFoundError(f"Validation directory not found: {VALID_DIR}")
+    if not os.path.isdir(valid_dir):
+        raise FileNotFoundError(f"Validation directory not found: {valid_dir}")
 
-    all_items = collect_image_paths(VALID_DIR)
+    all_items = collect_image_paths(valid_dir)
     if not all_items:
         raise RuntimeError("No validation images found.")
 

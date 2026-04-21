@@ -22,9 +22,11 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATASET_DIR = os.path.join(BASE_DIR, "data", "plant_disease_dataset")
-TRAIN_DIR = os.path.join(DATASET_DIR, "train")
-VALID_DIR = os.path.join(DATASET_DIR, "valid")
+DATA_ROOT = os.path.join(BASE_DIR, "data")
+DATASET_DIR = ""
+TRAIN_DIR = ""
+VALID_DIR = ""
+TEST_DIR = ""
 MODEL_DIR = os.path.join(BASE_DIR, "models")
 
 CLASS_MAP_PATH = os.path.join(MODEL_DIR, "disease_classes.pkl")
@@ -44,6 +46,56 @@ FAST_CLASSIFIER_EPOCHS = 8
 SKIP_AUTOENCODER_IF_EXISTS = True
 
 
+def resolve_dataset_dirs() -> tuple[str, str, str, str]:
+    """
+    Resolve disease dataset paths across supported layouts.
+
+    Supported examples:
+    - data/plant_disease_dataset/train + valid
+    - data/Plant Village Dataset/Train + Val
+    """
+    candidates = [
+        {
+            "dataset": "Plant Village Dataset",
+            "train": "Train",
+            "valid": "Val",
+            "test": "Test",
+        },
+        {
+            "dataset": "Plant Village Dataset",
+            "train": "train",
+            "valid": "val",
+            "test": "test",
+        },
+        {
+            "dataset": "plant_disease_dataset",
+            "train": "train",
+            "valid": "valid",
+            "test": "test",
+        },
+    ]
+
+    for item in candidates:
+        dataset_dir = os.path.join(DATA_ROOT, item["dataset"])
+        train_dir = os.path.join(dataset_dir, item["train"])
+        valid_dir = os.path.join(dataset_dir, item["valid"])
+        test_dir = os.path.join(dataset_dir, item["test"])
+        if os.path.isdir(train_dir) and os.path.isdir(valid_dir):
+            return dataset_dir, train_dir, valid_dir, test_dir
+
+    checked_paths = "\n".join(
+        [
+            os.path.join(DATA_ROOT, "plant_disease_dataset", "train") + " + valid",
+            os.path.join(DATA_ROOT, "Plant Village Dataset", "Train") + " + Val",
+            os.path.join(DATA_ROOT, "Plant Village Dataset", "train") + " + val",
+        ]
+    )
+    raise FileNotFoundError(
+        "Could not find a supported disease dataset split. Checked:\n"
+        f"{checked_paths}"
+    )
+
+
 def _separator(title: str) -> None:
     width = 62
     print(f"\n{'=' * width}")
@@ -58,12 +110,18 @@ def set_reproducibility(seed: int = SEED) -> None:
 
 
 def ensure_paths() -> None:
+    global DATASET_DIR, TRAIN_DIR, VALID_DIR, TEST_DIR
+    DATASET_DIR, TRAIN_DIR, VALID_DIR, TEST_DIR = resolve_dataset_dirs()
+
     if not os.path.isdir(TRAIN_DIR):
         raise FileNotFoundError(f"Training directory not found: {TRAIN_DIR}")
     if not os.path.isdir(VALID_DIR):
         raise FileNotFoundError(f"Validation directory not found: {VALID_DIR}")
     os.makedirs(MODEL_DIR, exist_ok=True)
     os.makedirs(BACKUP_DIR, exist_ok=True)
+    print(f"Dataset root: {DATASET_DIR}")
+    print(f"Train split : {TRAIN_DIR}")
+    print(f"Valid split : {VALID_DIR}")
 
 
 def create_generators(with_autoencoder_generators: bool = True):
