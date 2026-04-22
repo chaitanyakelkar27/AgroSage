@@ -362,6 +362,13 @@ def get_classifier(autoencoder: tf.keras.Model, num_classes: int) -> tf.keras.Mo
         _separator("4) Loading existing classifier")
         print(f"Loaded: {CNN_PATH}")
         model = tf.keras.models.load_model(CNN_PATH, compile=False)
+        output_units = model.output_shape[-1]
+        if output_units != num_classes:
+            print(
+                "Saved classifier output size does not match current dataset classes "
+                f"({output_units} vs {num_classes}). Rebuilding classifier."
+            )
+            return build_classifier(autoencoder=autoencoder, num_classes=num_classes)
         model.compile(
             optimizer=optimizers.Adam(learning_rate=1e-3),
             loss="categorical_crossentropy",
