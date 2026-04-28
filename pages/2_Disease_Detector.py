@@ -11,12 +11,14 @@ from PIL import Image
 from utils import load_css, render_sidebar
 from utils.disease_predictor import (
     load_disease_models,
+    load_vit_model,
     preprocess_image,
     clean_image,
     prepare_classifier_input,
     compute_image_quality_metrics,
     parse_disease_label,
     predict_disease,
+    predict_disease_vit,
 )
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -265,7 +267,18 @@ st.markdown("---")
 @st.cache_resource(show_spinner=False)
 def _load_models():
     """Cache disease model artifacts across reruns."""
-    return load_disease_models()
+    bundle = {
+        "cnn_bundle": load_disease_models(),
+        "vit_bundle": None,
+        "vit_error": None,
+    }
+
+    try:
+        bundle["vit_bundle"] = load_vit_model()
+    except Exception as exc:  # noqa: BLE001
+        bundle["vit_error"] = exc
+
+    return bundle
 
 
 try:
@@ -285,9 +298,12 @@ except Exception as exc:  # noqa: BLE001
     )
     st.stop()
 
-autoencoder = models["autoencoder"]
-cnn = models["cnn"]
-idx_to_class = models["idx_to_class"]
+cnn_bundle = models["cnn_bundle"]
+autoencoder = cnn_bundle["autoencoder"]
+cnn = cnn_bundle["cnn"]
+idx_to_class = cnn_bundle["idx_to_class"]
+vit_bundle = models.get("vit_bundle")
+vit_error = models.get("vit_error")
 
 # ── Session state initialisation ──────────────────────────────────────────────
 if "uploaded_image" not in st.session_state:
@@ -314,6 +330,15 @@ with upload_col:
         type=["jpg", "jpeg", "png", "webp"],
         help="Supported formats: JPG, JPEG, PNG, WebP. For best results use a clear, close-up photograph of the leaf.",
         key="disease_uploader",
+    )
+    model_choice = st.radio(
+        "Model",
+        options=["CNN (default)", "ViT (optional)"],
+        horizontal=True,
+        help=(
+            "CNN uses the existing autoencoder + classifier. "
+            "ViT requires a fine-tuned model in models/vit and extra dependencies."
+        ),
     )
     field_photo_mode = st.toggle(
         "Field Photo Mode (recommended)",
@@ -379,15 +404,34 @@ if current_image is not None:
             reconstruction_error = float(np.mean((img_batch - cleaned_batch) ** 2))
             quality_metrics = compute_image_quality_metrics(img_batch)
 
-            # Predict
-            result = predict_disease(
-                cnn,
-                classifier_input,
-                idx_to_class,
-                reconstruction_error=reconstruction_error,
-                image_quality_metrics=quality_metrics,
-                inference_mode="field" if field_photo_mode else "standard",
-            )
+            if model_choice.startswith("ViT"):
+                if vit_bundle is None:
+                    st.error(
+                        "**ViT model unavailable.** Place a fine-tuned transformers ViT model in "
+                        "`models/vit` and install torch, torchvision, and transformers.\n\n"
+                        f"Details: {vit_error}"
+                    )
+                    st.stop()
+
+                result = predict_disease_vit(
+                    vit_bundle["vit"],
+                    vit_bundle["vit_processor"],
+                    vit_bundle["vit_id_to_label"],
+                    current_image,
+                    idx_to_class,
+                    reconstruction_error=reconstruction_error,
+                    image_quality_metrics=quality_metrics,
+                )
+            else:
+                # Predict with existing CNN
+                result = predict_disease(
+                    cnn,
+                    classifier_input,
+                    idx_to_class,
+                    reconstruction_error=reconstruction_error,
+                    image_quality_metrics=quality_metrics,
+                    inference_mode="field" if field_photo_mode else "standard",
+                )
 
             # Store cleaned image for preview
             cleaned_arr = (np.squeeze(cleaned_batch, axis=0) * 255).astype(np.uint8)

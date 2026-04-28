@@ -12,6 +12,14 @@ import numpy as np
 from PIL import Image
 from tensorflow.keras.models import load_model
 
+try:
+    import torch
+    from transformers import AutoImageProcessor, ViTForImageClassification
+except Exception:  # noqa: BLE001
+    torch = None
+    AutoImageProcessor = None
+    ViTForImageClassification = None
+
 
 _UTILS_DIR = os.path.dirname(os.path.abspath(__file__))
 _PROJECT_ROOT = os.path.dirname(_UTILS_DIR)
@@ -20,6 +28,7 @@ _MODEL_DIR = os.path.join(_PROJECT_ROOT, "models")
 _CLASS_MAP = "disease_classes.pkl"
 _AUTOENCODER = "autoencoder.h5"
 _CNN = "disease_cnn.h5"
+_VIT_DIR = "vit"
 
 _RECON_ERROR_REVIEW_THRESHOLD = 0.00150
 _EDGE_DENSITY_REVIEW_THRESHOLD = 0.0650
@@ -62,6 +71,41 @@ def load_disease_models(model_dir: str | None = None) -> dict[str, Any]:
         "autoencoder": autoencoder,
         "cnn": cnn,
         "idx_to_class": idx_to_class,
+    }
+
+
+def _require_vit_dependencies() -> None:
+    if torch is None or AutoImageProcessor is None or ViTForImageClassification is None:
+        raise ImportError(
+            "ViT dependencies not available. Install torch, torchvision, and transformers."
+        )
+
+
+def load_vit_model(model_dir: str | None = None) -> dict[str, Any]:
+    """Load a fine-tuned ViT model from models/vit (transformers format)."""
+    _require_vit_dependencies()
+
+    directory = model_dir or _MODEL_DIR
+    vit_dir = os.path.join(directory, _VIT_DIR)
+
+    if not os.path.isdir(vit_dir):
+        raise FileNotFoundError(
+            f"Missing ViT model directory: {vit_dir}. "
+            "Place a fine-tuned transformers ViT model in models/vit."
+        )
+
+    processor = AutoImageProcessor.from_pretrained(vit_dir)
+    model = ViTForImageClassification.from_pretrained(vit_dir)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model.to(device)
+    model.eval()
+
+    id_to_label = model.config.id2label or {}
+    return {
+        "vit": model,
+        "vit_processor": processor,
+        "vit_id_to_label": id_to_label,
+        "vit_device": device,
     }
 
 
@@ -206,25 +250,38 @@ def _healthy_probability_for_plant(
     return 0.0
 
 
-def predict_disease(
-    cnn,
-    cleaned_batch: np.ndarray,
+def _align_probs_with_class_map(
+    probs: np.ndarray,
+    vit_id_to_label: dict[int, str],
     idx_to_class: dict[int, str],
-    reconstruction_error: float | None = None,
-    image_quality_metrics: dict[str, float] | None = None,
-    inference_mode: str = "field",
+) -> np.ndarray:
+    if not vit_id_to_label:
+        return probs
+
+    label_to_prob: dict[str, float] = {}
+    for idx, label in vit_id_to_label.items():
+        label_to_prob[str(label).strip().lower()] = float(probs[int(idx)])
+
+    aligned = []
+    for idx in sorted(idx_to_class.keys()):
+        label_key = idx_to_class[idx].strip().lower()
+        aligned.append(label_to_prob.get(label_key, 0.0))
+    return np.asarray(aligned, dtype=np.float32)
+
+
+def _build_prediction_output(
+    probs: np.ndarray,
+    idx_to_class: dict[int, str],
+    reconstruction_error: float | None,
+    image_quality_metrics: dict[str, float] | None,
+    inference_mode: str,
+    tta_probs: np.ndarray | None = None,
 ) -> dict[str, Any]:
-    """Predict disease class and return structured output for UI consumption."""
     mode = (inference_mode or "field").strip().lower()
     if mode not in {"field", "standard"}:
         mode = "field"
 
-    if mode == "field":
-        tta_batch = _build_tta_batch(cleaned_batch)
-        tta_probs = cnn.predict(tta_batch, verbose=0)
-        probs = np.mean(tta_probs, axis=0)
-    else:
-        probs = cnn.predict(cleaned_batch, verbose=0)[0]
+    if tta_probs is None:
         tta_probs = np.expand_dims(probs, axis=0)
 
     sorted_indices = np.argsort(probs)[::-1]
@@ -333,3 +390,66 @@ def predict_disease(
         "image_quality_metrics": quality_metrics,
         "all_results": all_results,
     }
+
+
+def predict_disease(
+    cnn,
+    cleaned_batch: np.ndarray,
+    idx_to_class: dict[int, str],
+    reconstruction_error: float | None = None,
+    image_quality_metrics: dict[str, float] | None = None,
+    inference_mode: str = "field",
+) -> dict[str, Any]:
+    """Predict disease class and return structured output for UI consumption."""
+    mode = (inference_mode or "field").strip().lower()
+    if mode not in {"field", "standard"}:
+        mode = "field"
+
+    if mode == "field":
+        tta_batch = _build_tta_batch(cleaned_batch)
+        tta_probs = cnn.predict(tta_batch, verbose=0)
+        probs = np.mean(tta_probs, axis=0)
+    else:
+        probs = cnn.predict(cleaned_batch, verbose=0)[0]
+        tta_probs = np.expand_dims(probs, axis=0)
+
+    return _build_prediction_output(
+        probs=probs,
+        idx_to_class=idx_to_class,
+        reconstruction_error=reconstruction_error,
+        image_quality_metrics=image_quality_metrics,
+        inference_mode=mode,
+        tta_probs=tta_probs,
+    )
+
+
+def predict_disease_vit(
+    vit,
+    vit_processor,
+    vit_id_to_label: dict[int, str],
+    pil_image: Image.Image,
+    idx_to_class: dict[int, str],
+    reconstruction_error: float | None = None,
+    image_quality_metrics: dict[str, float] | None = None,
+) -> dict[str, Any]:
+    """Run ViT inference and return structured output aligned to class map."""
+    _require_vit_dependencies()
+
+    inputs = vit_processor(images=pil_image, return_tensors="pt")
+    device = next(vit.parameters()).device
+    inputs = {key: value.to(device) for key, value in inputs.items()}
+
+    with torch.no_grad():
+        logits = vit(**inputs).logits
+        probs = torch.softmax(logits, dim=-1).cpu().numpy()[0]
+
+    aligned_probs = _align_probs_with_class_map(probs, vit_id_to_label, idx_to_class)
+
+    return _build_prediction_output(
+        probs=aligned_probs,
+        idx_to_class=idx_to_class,
+        reconstruction_error=reconstruction_error,
+        image_quality_metrics=image_quality_metrics,
+        inference_mode="standard",
+        tta_probs=np.expand_dims(aligned_probs, axis=0),
+    )

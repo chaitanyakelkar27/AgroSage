@@ -110,10 +110,12 @@ from utils.crop_predictor import (         # noqa: E402, F401
 
 from utils.disease_predictor import (      # noqa: E402, F401
     load_disease_models,
+    load_vit_model,
     preprocess_image,
     clean_image,
     parse_disease_label,
     predict_disease,
+    predict_disease_vit,
 )
 
 __all__ = [
@@ -125,9 +127,11 @@ __all__ = [
     "load_crop_models",
     "predict_crop",
     "load_disease_models",
+    "load_vit_model",
     "preprocess_image",
     "clean_image",
     "parse_disease_label",
     "predict_disease",
+    "predict_disease_vit",
 ]
 
