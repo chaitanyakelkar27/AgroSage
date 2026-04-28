@@ -311,6 +311,27 @@ header[data-testid="stHeader"] {
     margin-bottom: 0.2rem !important;
 }
 
+/* Ensure radio/toggle option text is readable on light surfaces */
+[data-testid="stRadio"] label,
+[data-testid="stRadio"] label span,
+[data-testid="stRadio"] label div,
+[data-testid="stToggle"] label,
+[data-testid="stToggle"] label span,
+[data-testid="stToggle"] label div,
+[data-testid="stToggle"] p,
+[data-testid="stToggle"] span {
+    color: var(--color-text) !important;
+    opacity: 1 !important;
+}
+
+/* Keep instruction/help cards readable */
+.dd-note,
+.dd-note p,
+.dd-note span {
+    color: var(--color-text-secondary) !important;
+    opacity: 1 !important;
+}
+
 /* Select boxes */
 .stSelectbox>div>div,
 .stMultiSelect>div>div {
