@@ -196,7 +196,7 @@ def main() -> None:
     plot_loss(history, loss_graph_path)
 
     print("[4/4] Computing confusion matrix on validation data...")
-    # Reload original model to avoid confusion matrix being influenced by short tuning pass.
+    # yad original model to avoid confusion matrix being influenced by short tuning pass.
     model_bundle_eval = load_disease_models_local()
     eval_cnn = model_bundle_eval["cnn"]
     eval_idx_to_class = model_bundle_eval["idx_to_class"]

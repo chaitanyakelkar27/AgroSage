@@ -89,6 +89,13 @@ The weather page expects:
 OWM_API_KEY=your_api_key_here
 ```
 
+The Q&A assistant expects:
+
+```env
+GROQ_API_KEY=your_api_key_here
+AGROSAGE_LLM_MODEL=llama-3.1-70b-versatile
+```
+
 ### 4. Verify data files
 
 Place the required datasets under `data/`:
