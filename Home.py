@@ -128,6 +128,7 @@ st.markdown("""
 .ag-module-icon.crop    { background: linear-gradient(135deg, #2D6A4F, #40916C); }
 .ag-module-icon.disease { background: linear-gradient(135deg, #1B6B93, #4FC0D0); }
 .ag-module-icon.weather { background: linear-gradient(135deg, #6C3483, #A569BD); }
+.ag-module-icon.assistant { background: linear-gradient(135deg, #6C5B2A, #C8A24A); }
 
 .ag-module-name {
     font-family: var(--font-body);
@@ -370,7 +371,7 @@ col4.metric("Model Artifacts", f"{models_ready}/{len(model_files)}")
 st.markdown('<div class="ag-section"><div class="ag-section-title">Platform Modules</div></div>',
             unsafe_allow_html=True)
 
-mc1, mc2, mc3 = st.columns(3)
+mc1, mc2, mc3, mc4 = st.columns(4)
 
 with mc1:
     st.markdown(
@@ -411,6 +412,21 @@ with mc3:
             <p class="ag-module-desc">
                 Access real-time weather data and explore historical climate
                 trends through interactive charts for your region.
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+with mc4:
+    st.markdown(
+        """
+        <div class="ag-module-card">
+            <div class="ag-module-icon assistant">QA</div>
+            <div class="ag-module-name">Agronomy Assistant</div>
+            <p class="ag-module-desc">
+                Ask agronomy questions or get help understanding AgroSage workflows
+                with the LangChain Q&A assistant.
             </p>
         </div>
         """,
