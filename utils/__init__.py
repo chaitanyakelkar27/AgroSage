@@ -78,6 +78,7 @@ def render_sidebar() -> None:
         st.page_link("pages/1_Crop_Recommender.py", label="Crop Recommender", use_container_width=True)
         st.page_link("pages/2_Disease_Detector.py", label="Disease Detector", use_container_width=True)
         st.page_link("pages/3_Weather_Analyst.py", label="Weather Analyst", use_container_width=True)
+        st.page_link("pages/4_Agronomy_Assistant.py", label="Agronomy Assistant", use_container_width=True)
 
         st.markdown("---")
 
@@ -108,15 +109,25 @@ from utils.crop_predictor import (         # noqa: E402, F401
     predict_crop,
 )
 
-from utils.disease_predictor import (      # noqa: E402, F401
-    load_disease_models,
-    load_vit_model,
-    preprocess_image,
-    clean_image,
-    parse_disease_label,
-    predict_disease,
-    predict_disease_vit,
-)
+try:
+    from utils.disease_predictor import (  # noqa: E402, F401
+        load_disease_models,
+        load_vit_model,
+        preprocess_image,
+        clean_image,
+        parse_disease_label,
+        predict_disease,
+        predict_disease_vit,
+    )
+except Exception:  # noqa: BLE001
+    # Optional dependency (tensorflow/torch) may be missing.
+    load_disease_models = None
+    load_vit_model = None
+    preprocess_image = None
+    clean_image = None
+    parse_disease_label = None
+    predict_disease = None
+    predict_disease_vit = None
 
 __all__ = [
     "load_css",
