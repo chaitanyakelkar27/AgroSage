@@ -5,10 +5,11 @@ AgroSage is a Streamlit-based smart crop advisory platform that brings together 
 ## Features
 
 - Crop recommendation based on soil nutrients and weather inputs such as N, P, K, temperature, humidity, pH, and rainfall.
-- Plant disease detection from leaf images using a TensorFlow/Keras CNN with confidence scoring.
+- Plant disease detection from leaf images using a TensorFlow/Keras CNN or a ViT classifier with confidence scoring.
 - Weather analysis with historical climate trends and OpenWeatherMap-backed forecasts.
+- LangChain-powered Q&A assistant for agronomy guidance and workflow explanations.
 - A unified multi-page Streamlit dashboard with a reusable sidebar, shared styling, and modular page design.
-- Training and evaluation scripts for regenerating the crop and disease models.
+- Training and evaluation scripts for regenerating the crop, CNN, and ViT disease models.
 
 ## Tech Stack
 
@@ -16,18 +17,20 @@ AgroSage is a Streamlit-based smart crop advisory platform that brings together 
 |---|---|
 | UI | Streamlit |
 | Machine Learning | scikit-learn, Random Forest, GridSearchCV, KMeans |
-| Deep Learning | TensorFlow, Keras |
+| Deep Learning | TensorFlow, Keras, PyTorch, Vision Transformer (ViT) |
 | Data Processing | pandas, NumPy |
 | Visualization | Plotly |
 | Imaging | Pillow |
 | Model Persistence | joblib, HDF5 artifacts |
 | API Access | requests |
+| LLM Orchestration | LangChain |
 
 ## Concepts Used
 
 | Concept | Where It Appears |
 |---|---|
 | Supervised classification | Crop recommendation and disease detection |
+| Transfer learning | ViT-based disease classifier |
 | Feature scaling | Crop model preprocessing with StandardScaler |
 | Hyperparameter tuning | GridSearchCV for the crop model |
 | Clustering | Similar crop suggestions using KMeans |
@@ -43,7 +46,10 @@ AgroSage is a Streamlit-based smart crop advisory platform that brings together 
 |---|---|
 | streamlit | Web app framework and UI rendering |
 | scikit-learn | Crop model training and inference |
-| tensorflow | Disease classifier and autoencoder |
+| tensorflow | CNN disease classifier and autoencoder |
+| torch | ViT training and inference |
+| transformers | ViT model and image processor |
+| langchain | Q&A assistant orchestration |
 | pandas | CSV loading and tabular manipulation |
 | numpy | Numerical operations |
 | plotly | Interactive charts and visualizations |
@@ -96,6 +102,7 @@ Place the required datasets under `data/`:
 ```bash
 python training/train_crop_model.py
 python training/train_disease_model.py
+python training/train_vit_disease_model.py
 ```
 
 Optional evaluation:
@@ -129,6 +136,7 @@ AgroSage/
 ├── training/
 │   ├── train_crop_model.py
 │   ├── train_disease_model.py
+│   ├── train_vit_disease_model.py
 │   ├── evaluate_disease_model.py
 │   └── generate_disease_report_figures.py
 ├── config/
@@ -155,6 +163,7 @@ The repository includes trained artifacts under `models/`:
 - `autoencoder.h5`
 - `disease_cnn.h5`
 - `disease_classes.pkl`
+- `vit/` (transformers ViT model + processor)
 
 ## Notes
 
