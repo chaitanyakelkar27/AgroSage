@@ -1,0 +1,74 @@
+{
+  "city": "Mumbai",
+  "climate_zone": "Tropical coastal",
+  "timestamp": "2026-05-04T00:58:36",
+  "current": {
+    "temperature": 28.2,
+    "humidity": 81,
+    "wind_speed": 13.4,
+    "pressure": 1009,
+    "condition": "Thunderstorm",
+    "condition_code": "thunderstorm",
+    "feels_like": 25.4,
+    "visibility_km": 12.0,
+    "uv_index": 5
+  },
+  "forecast": [
+    {
+      "date": "2026-05-05",
+      "day_name": "Tuesday",
+      "temp_high": 29.8,
+      "temp_low": 23.6,
+      "humidity": 74,
+      "wind_speed": 20.4,
+      "rainfall_chance": 88,
+      "condition": "Light Rain",
+      "condition_code": "light_rain"
+    },
+    {
+      "date": "2026-05-06",
+      "day_name": "Wednesday",
+      "temp_high": 25.8,
+      "temp_low": 16.0,
+      "humidity": 65,
+      "wind_speed": 17.3,
+      "rainfall_chance": 13,
+      "condition": "Overcast",
+      "condition_code": "overcast"
+    },
+    {
+      "date": "2026-05-07",
+      "day_name": "Thursday",
+      "temp_high": 32.3,
+      "temp_low": 24.6,
+      "humidity": 87,
+      "wind_speed": 19.7,
+      "rainfall_chance": 90,
+      "condition": "Windy",
+      "condition_code": "windy"
+    },
+    {
+      "date": "2026-05-08",
+      "day_name": "Friday",
+      "temp_high": 30.5,
+      "temp_low": 25.2,
+      "humidity": 84,
+      "wind_speed": 11.6,
+      "rainfall_chance": 61,
+      "condition": "Thunderstorm",
+      "condition_code": "thunderstorm"
+    },
+    {
+      "date": "2026-05-09",
+      "day_name": "Saturday",
+      "temp_high": 27.6,
+      "temp_low": 23.2,
+      "humidity": 72,
+      "wind_speed": 21.4,
+      "rainfall_chance": 52,
+      "condition": "Clear Sky",
+      "condition_code": "clear"
+    }
+  ],
+  "_cached_at": 1777836516.657241
+}

@@ -32,16 +32,23 @@ desktop.ini
 # ── Jupyter ──
 .ipynb_checkpoints/
 
-# ── Trained Models (large binaries) ──
-models/*.pkl
-models/*.h5
-models/*.savedmodel/
-models/*.tflite
-models/*.onnx
+# ── Trained Models (large binaries) — INCLUDE for deployment ──
+!models/*.pkl
+!models/*.h5
 !models/.gitkeep
 
-# ── Datasets (entire folder) ──
-data/
+# ── Large training datasets — EXCLUDE (not needed at runtime) ──
+data/Plant\ Village\ Dataset/
+data/plant_disease_dataset/
+data/*.tflite
+data/*.onnx
+data/*.savedmodel/
+
+# ── Small runtime CSVs — INCLUDE ──
+!data/Crop_recommendation.csv
+!data/DailyDelhiClimate.csv
+!data/weather_cache.json
+!data/.gitkeep
 
 # ── Logs & Temp ──
 *.log
