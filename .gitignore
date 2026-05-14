@@ -38,11 +38,14 @@ desktop.ini
 !models/.gitkeep
 
 # ── Large training datasets — EXCLUDE (not needed at runtime) ──
-data/Plant\ Village\ Dataset/
-data/plant_disease_dataset/
+data/Plant*Village*/
+data/plant_disease_dataset*/
 data/*.tflite
 data/*.onnx
 data/*.savedmodel/
+
+# ── Dev tools / scripts ──
+tools/
 
 # ── Small runtime CSVs — INCLUDE ──
 !data/Crop_recommendation.csv
